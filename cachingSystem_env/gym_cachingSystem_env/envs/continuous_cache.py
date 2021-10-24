@@ -31,20 +31,28 @@ class ContinuousCache(gym.Env):
         self.max_action = 1.0
 
         # The state is all the contents on the recommendation list of each users.
-        self.low_state = np.array(
-            [self.min_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
-            dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
-        self.high_state = np.array(
-            [self.max_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
-            dtype=np.float32)
+        # self.low_state = np.array(
+        #     [self.min_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
+        #     dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
+        # self.high_state = np.array(
+        #     [self.max_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
+        #     dtype=np.float32)
 
-        # # The state is the top content on the recommendation list of each users.
+        # The state is the top content on the recommendation list of each users.
         # self.low_state = np.array(
         #     [self.min_rating] * (self.critics_num+1) * self.users_num,
         #     dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
         # self.high_state = np.array(
         #     [self.max_rating] * (self.critics_num+1) * self.users_num,
         #     dtype=np.float32)
+
+        # The state when we know contents critic preferences of users from recommendation system.
+        self.low_state = np.array(
+            [self.min_rating] * self.critics_num * self.users_num,
+            dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
+        self.high_state = np.array(
+            [self.max_rating] * self.critics_num * self.users_num,
+            dtype=np.float32)
 
         self.action_space = spaces.Box(
             low=self.min_action,
@@ -226,13 +234,13 @@ class ContinuousCache(gym.Env):
 
     def update_state(self):
         # The state is all the contents on the recommendation list of each users.
-        state = np.array([])
-        for i in range(self.users_num):
-            for j in range(self.recommendation_list_size):
-                content = self.recommendation_list[i][j]
-                state = np.append(state, self.contents[content])
-                state = np.append(state, self.users[i][content])
-        state = state.flatten()
+        # state = np.array([])
+        # for i in range(self.users_num):
+        #     for j in range(self.recommendation_list_size):
+        #         content = self.recommendation_list[i][j]
+        #         state = np.append(state, self.contents[content])
+        #         state = np.append(state, self.users[i][content])
+        # state = state.flatten()
 
         # The state is the top contents on the recommendation list of each users.
         # state = np.array([])
@@ -241,6 +249,15 @@ class ContinuousCache(gym.Env):
         #     state = np.append(state, self.contents[content])
         #     state = np.append(state, self.users[i][content])
         # state = state.flatten()
+
+        # The state when we know contents critic preferences of users from recommendation system.
+        users_preference = np.array([])
+        for i in range(self.users_num):
+            user_preference = [0 for _ in range(self.critics_num)]
+            user_preference[0] = 0.5
+            user_preference[self.users_preference[i]] = 0.5
+            users_preference = np.append(users_preference, user_preference)
+        state = users_preference.flatten()
 
         return state
 
