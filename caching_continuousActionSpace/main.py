@@ -11,7 +11,7 @@ from ddpg import ddpgAgent
 from gym_cachingSystem_env.envs.continuous_cache import ContinuousCache
 
 
-NUM_EPISODES_ = 2000
+NUM_EPISODES_ = 500
 
 # Make directories for tensorboard
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
