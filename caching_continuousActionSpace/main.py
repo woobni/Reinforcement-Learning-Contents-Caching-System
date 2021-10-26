@@ -4,7 +4,6 @@ import os
 from tqdm import tqdm
 import datetime
 import pickle
-import argparse
 
 import tensorflow as tf
 from ddpg import ddpgAgent
@@ -53,7 +52,6 @@ def model_train():
         print("=========EPISODE # %d =========="%epi)
 
         obs = env.reset()
-        # print('contents => ', env.contents)
 
         epi_reward = 0
         epi_proposed_caching_score = 0
