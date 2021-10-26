@@ -108,7 +108,7 @@ class ContinuousCache(gym.Env):
             # preference = preferences[i]
 
             # first critic has universal content preference. so, fix to
-            expected_ratings = [0.7*x + 0.3*y for x, y in zip(self.critics[0], self.critics[preference])]
+            expected_ratings = [0.5*x + 0.5*y for x, y in zip(self.critics[0], self.critics[preference])]
             # expected_ratings = self.critics[preference]
             expected_ratings = list(np.round(expected_ratings, 2))
             users.append(expected_ratings)
@@ -176,8 +176,6 @@ class ContinuousCache(gym.Env):
                 if self.cache[j] in self.recommendation_list[i]:
                     rating_sum = rating_sum + self.users[i][self.cache[j]]
                 else: continue
-
-        print('proposed caching score => ', np.round(rating_sum, 2))
 
         return rating_sum
 
@@ -269,7 +267,8 @@ class ContinuousCache(gym.Env):
         # if not done:
 
         # reward = self.proposed_caching_score - self.popularity_caching_score
-        reward = self.recommendation_rating_sum()
+        rating_sum = self.recommendation_rating_sum()
+        reward = rating_sum
 
         self.state = self.update_state()
 
@@ -283,6 +282,7 @@ class ContinuousCache(gym.Env):
         print('recommendation list => ', self.recommendation_list)
         print('reward => ', np.round(reward, 2))
         print('next state=> ', self.state)
+        print('proposed caching score => ', np.round(rating_sum, 2))
 
         return self.state, reward, {}, {}
 
@@ -523,7 +523,6 @@ class ContinuousCache(gym.Env):
         return rating_sum
 
 #     def preference_request(self):
-#         #선호도를 기반으로 유저의 콘텐츠 요청 생성
 #         preference_content_user = self.preference(self.content_feature, self.user_feature)
 #         preference_CDF = preference_content_user.cumsum()
 
