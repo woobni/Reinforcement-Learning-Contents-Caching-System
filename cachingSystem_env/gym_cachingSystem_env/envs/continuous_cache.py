@@ -108,7 +108,7 @@ class ContinuousCache(gym.Env):
             # preference = preferences[i]
 
             # first critic has universal content preference. so, fix to
-            expected_ratings = [0.3*x + 0.7*y for x, y in zip(self.critics[0], self.critics[preference])]
+            expected_ratings = [0.7*x + 0.3*y for x, y in zip(self.critics[0], self.critics[preference])]
             # expected_ratings = self.critics[preference]
             expected_ratings = list(np.round(expected_ratings, 2))
             users.append(expected_ratings)
