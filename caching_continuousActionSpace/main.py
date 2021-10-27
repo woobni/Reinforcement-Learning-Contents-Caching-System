@@ -78,6 +78,7 @@ def model_train():
             epi_proposed_caching_score += reward
             epi_random_caching_score += env.random_caching()
             epi_popularity_caching_score += env.popularity_caching()
+            epi_optimal_caching_score += env.optimal_caching()
 
             # moving average score
             # epi_proposed_caching_score = 0.9 * epi_proposed_caching_score + 0.1 * env.proposed_caching_score
@@ -125,9 +126,9 @@ def model_train():
                 with random_caching_summary_writer.as_default():
                     tf.summary.scalar('epi_score', epi_random_caching_score, step=epi)
 
-                # with optimal_caching_summary_writer.as_default():
-                #     # tf.summary.scalar('epi_score', optimal_caching_score_mean, step=epi)
-                #     tf.summary.scalar('epi_score', epi_optimal_caching_score, step=epi)
+                with optimal_caching_summary_writer.as_default():
+                    # tf.summary.scalar('epi_score', optimal_caching_score_mean, step=epi)
+                    tf.summary.scalar('epi_score', epi_optimal_caching_score, step=epi)
 
                 break
 

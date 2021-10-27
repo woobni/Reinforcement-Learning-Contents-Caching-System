@@ -22,7 +22,7 @@ class ContinuousCache(gym.Env):
         self.critics_num = 5
         self.critics = self.generate_critics()
         self.contents = self.generate_contents()
-        self.users_num = 4
+        self.users_num = 2  # 4
         self.users, self.users_preference = self.update_users()
         self.recommendation_list_size = 5  # number of contents recommended to users within cache.
         self.recommendation_list = self.update_recommendation_list()
@@ -98,14 +98,14 @@ class ContinuousCache(gym.Env):
         # feature of users with expected ratings.
         users = []
         preferences = []
-        # preferences = [1, 1, 2, 2]
+        preferences = [1, 2]
         for i in range(self.users_num):
             # Suppose the users continues to change. (Random critic preference)
-            preference = np.random.randint(1, self.critics_num)
-            preferences.append(preference)
+            # preference = np.random.randint(1, self.critics_num)
+            # preferences.append(preference)
 
             # Suppose the users continues to remain unchanged. (Fix critic preference)
-            # preference = preferences[i]
+            preference = preferences[i]
 
             # first critic has universal content preference. so, fix to
             expected_ratings = [0.5*x + 0.5*y for x, y in zip(self.critics[0], self.critics[preference])]
@@ -458,13 +458,13 @@ class ContinuousCache(gym.Env):
         # Calculate the optimal cache when knowing the user's critic preference.
         users = []
         for i in range(self.users_num):
-            user = [0.3] + [0]*(self.critics_num-1)
-            user[self.users_preference[i]] = 0.7
+            user = [0.5] + [0]*(self.critics_num-1)
+            user[self.users_preference[i]] = 0.5
             users.append(user)
 
         critic_prob = []
         for j in range(self.users_num):
-            for k in range(int(self.cache_size/2)):
+            for k in range(int(self.recommendation_list_size)):
                 critic_prob.append(users[j])
 
         critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
