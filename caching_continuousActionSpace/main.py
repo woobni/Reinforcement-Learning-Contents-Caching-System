@@ -43,7 +43,8 @@ def model_train():
     print("num_of_observation_spaces: %d"%num_obs_)
     print("max_steps_per_episode: %d"%steps)
 
-    logger = dict(episode=[], contents=[], critics=[], users=[])
+    logger = dict(episode=[], contents=[], critics=[], users=[], proposed_caching_score=[],
+                  popularity_caching_score=[], random_caching_score=[], optimal_caching_score=[])
 
     popularity_caching_score_list = []
     optimal_caching_score_list = []
@@ -101,6 +102,10 @@ def model_train():
                 logger['contents'].append(env.contents)
                 logger['critics'].append(env.critics)
                 logger['users'].append(env.users)
+                logger['proposed_caching_score'].append(epi_proposed_caching_score)
+                logger['popularity_caching_score'].append(epi_popularity_caching_score)
+                logger['random_caching_score'].append(epi_random_caching_score)
+                # logger['optimal_caching_score'].append(epi_optimal_caching_score)
 
                 # logger['critic_loss'].append(agent.critic.critic_loss)
 
