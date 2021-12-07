@@ -14,7 +14,7 @@ from gym import spaces
 class ContinuousCache(gym.Env):
     def __init__(self):
         self.step_size = 100
-        self.contents_total_num = 3000
+        self.contents_total_num = 300
         self.cache_size = 10
         self.cache = self.cache_init_random()
         self.max_rating = 5  # max ratings that critics give to contents.
@@ -108,7 +108,7 @@ class ContinuousCache(gym.Env):
             preference = preferences[i]
 
             # first critic has universal content preference. so, fix to
-            expected_ratings = [0.7*x + 0.3*y for x, y in zip(self.critics[0], self.critics[preference])]
+            expected_ratings = [0.5*x + 0.5*y for x, y in zip(self.critics[0], self.critics[preference])]
             # expected_ratings = self.critics[preference]
             expected_ratings = list(np.round(expected_ratings, 2))
             users.append(expected_ratings)
