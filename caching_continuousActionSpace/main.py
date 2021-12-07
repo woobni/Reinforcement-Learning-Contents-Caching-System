@@ -101,6 +101,7 @@ def model_train():
                 logger['contents'].append(env.contents)
                 logger['critics'].append(env.critics)
                 logger['users'].append(env.users)
+
                 # logger['critic_loss'].append(agent.critic.critic_loss)
 
                 # Find the average score when the user doesn't change during the episode.
