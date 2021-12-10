@@ -24,7 +24,7 @@ class ContinuousCache(gym.Env):
         self.contents = self.generate_contents()
         self.users_num = 4
         self.users, self.users_preference = self.update_users()
-        self.recommendation_list_size = 5  # number of contents recommended to users within cache.
+        self.recommendation_list_size = 10  # number of contents recommended to users within cache.
         self.recommendation_list = self.update_recommendation_list()
         self.state = self.update_state()
         self.min_action = 0.0
