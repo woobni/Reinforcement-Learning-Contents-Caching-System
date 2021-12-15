@@ -14,7 +14,7 @@ from gym import spaces
 class ContinuousCache(gym.Env):
     def __init__(self):
         self.step_size = 100
-        self.contents_total_num = 500
+        self.contents_total_num = 5000
         self.cache_size = 20
         self.cache = self.cache_init_random()
         self.max_rating = 5  # max ratings that critics give to contents.
