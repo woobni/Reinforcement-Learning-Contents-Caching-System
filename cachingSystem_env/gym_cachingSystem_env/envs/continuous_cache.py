@@ -14,8 +14,8 @@ from gym import spaces
 class ContinuousCache(gym.Env):
     def __init__(self):
         self.step_size = 100
-        self.contents_total_num = 5000
-        self.cache_size = 20
+        self.contents_total_num = 500
+        self.cache_size = 10
         self.cache = self.cache_init_random()
         self.max_rating = 5  # max ratings that critics give to contents.
         self.min_rating = 0  # min ratings that critics give to contents.
@@ -24,11 +24,14 @@ class ContinuousCache(gym.Env):
         self.contents = self.generate_contents()
         self.users_num = 4
         self.users, self.users_preference = self.update_users()
-        self.recommendation_list_size = 10  # number of contents recommended to users within cache.
+        self.recommendation_list_size = 5  # number of contents recommended to users within cache.
         self.recommendation_list = self.update_recommendation_list()
         self.state = self.update_state()
         self.min_action = 0.0
         self.max_action = 1.0
+        self.proposed_caching_score = 0
+        self.popularity_caching_score = 0
+        self.random_caching_score = 0
 
         # The state is all the contents on the recommendation list of each users.
         self.low_state = np.array(
@@ -266,23 +269,24 @@ class ContinuousCache(gym.Env):
         # done = bool(self.count == self.step_size)
         # if not done:
 
-        # reward = self.proposed_caching_score - self.popularity_caching_score
-        rating_sum = self.recommendation_rating_sum()
-        reward = rating_sum
-
-        self.state = self.update_state()
-
         print("\n")
-        print("==============================================================")
-        # print('critics => ', self.critics)
-        # print('users => ', self.users)
         print('users preference => ', self.users_preference)
         print('proto action => ', np.round(critic_prob, 2))
         print('cache => ', self.cache)
         print('recommendation list => ', self.recommendation_list)
-        print('reward => ', np.round(reward, 2))
+
+        self.state = self.update_state()
         print('next state=> ', self.state)
-        print('proposed caching score => ', np.round(rating_sum, 2))
+
+        self.proposed_caching_score = self.recommendation_rating_sum()
+        print('proposed caching score => ', np.round(self.proposed_caching_score, 2))
+
+        self.popularity_caching_score = self.popularity_caching
+        self.random_caching_score = self.random_caching()
+
+        # reward = rating_sum
+        reward = self.proposed_caching_score - self.popularity_caching_score
+        print('reward => ', np.round(reward, 2))
 
         return self.state, reward, {}, {}
 
