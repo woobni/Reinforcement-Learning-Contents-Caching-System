@@ -77,9 +77,9 @@ def model_train():
             obs = new_obs
             epi_reward = epi_reward + reward
 
-            epi_proposed_caching_score += env.proposed_caching_score()
-            epi_popularity_caching_score += env.popularity_caching_score()
-            epi_random_caching_score += env.random_caching_score()
+            epi_proposed_caching_score += env.proposed_caching_score
+            epi_popularity_caching_score += env.popularity_caching_score
+            epi_random_caching_score += env.random_caching_score
             # epi_optimal_caching_score += env.optimal_caching()
 
             # train models through memory replay

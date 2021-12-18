@@ -269,7 +269,6 @@ class ContinuousCache(gym.Env):
         # done = bool(self.count == self.step_size)
         # if not done:
 
-        print("\n")
         print('users preference => ', self.users_preference)
         print('proto action => ', np.round(critic_prob, 2))
         print('cache => ', self.cache)
@@ -281,7 +280,7 @@ class ContinuousCache(gym.Env):
         self.proposed_caching_score = self.recommendation_rating_sum()
         print('proposed caching score => ', np.round(self.proposed_caching_score, 2))
 
-        self.popularity_caching_score = self.popularity_caching
+        self.popularity_caching_score = self.popularity_caching()
         self.random_caching_score = self.random_caching()
 
         # reward = rating_sum
