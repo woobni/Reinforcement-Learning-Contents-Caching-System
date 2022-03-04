@@ -294,7 +294,6 @@ class ContinuousCache(gym.Env):
         self.popularity_caching_score = self.popularity_caching()
         self.random_caching_score = self.random_caching()
 
-        # reward = self.proposed_caching_score - self.popularity_caching_score
         reward = self.proposed_caching_score
         print('reward => ', np.round(reward, 2))
 
