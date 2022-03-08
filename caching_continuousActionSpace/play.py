@@ -47,7 +47,7 @@ def model_test(pretrained_):
 	print("num_of_observation_spaces: %d"%num_obs_)
 	print("max_steps_per_episode: %d"%steps)
 
-	logger = dict(episode=[], contents=[], critics=[], users=[])
+	logger = dict(episode=[], contents=[], factors=[], users=[])
 
 	for epi in range(NUM_EPISODES_):
 		print("=========EPISODE # %d =========="%epi)
@@ -80,7 +80,7 @@ def model_test(pretrained_):
 				# save logs
 				logger['episode'] = range(epi+1)
 				logger['contents'].append(env.contents)
-				logger['critics'].append(env.critics)
+				logger['factors'].append(env.factors)
 				logger['users'].append(env.users)
 
 				# Draw score graph

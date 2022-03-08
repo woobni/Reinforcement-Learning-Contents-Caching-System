@@ -17,10 +17,10 @@ class ContinuousCache(gym.Env):
         self.contents_total_num = 500
         self.cache_size = 10
         self.cache = self.cache_init_random()
-        self.max_rating = 5  # max ratings that critics give to contents.
-        self.min_rating = 0  # min ratings that critics give to contents.
-        self.critics_num = 5
-        self.critics = self.generate_critics()
+        self.max_rating = 5  # max ratings that factors give to contents.
+        self.min_rating = 0  # min ratings that factors give to contents.
+        self.factors_num = 5
+        self.factors = self.generate_factors()
         self.contents = self.generate_contents()
         self.users_num = 4
         self.users, self.users_preference = self.update_users()
@@ -35,32 +35,32 @@ class ContinuousCache(gym.Env):
 
         # The state is all the contents on the recommendation list of each users.
         self.low_state = np.array(
-            [self.min_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
-            dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
+            [self.min_rating] * (self.factors_num+1) * self.recommendation_list_size * self.users_num,
+            dtype=np.float32)  # (self.factors_num+1) => contents feature and contents expected rating.
         self.high_state = np.array(
-            [self.max_rating] * (self.critics_num+1) * self.recommendation_list_size * self.users_num,
+            [self.max_rating] * (self.factors_num+1) * self.recommendation_list_size * self.users_num,
             dtype=np.float32)
 
         # The state is the top content on the recommendation list of each users.
         # self.low_state = np.array(
-        #     [self.min_rating] * (self.critics_num+1) * self.users_num,
-        #     dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
+        #     [self.min_rating] * (self.factors_num+1) * self.users_num,
+        #     dtype=np.float32)  # (self.factors_num+1) => contents feature and contents expected rating.
         # self.high_state = np.array(
-        #     [self.max_rating] * (self.critics_num+1) * self.users_num,
+        #     [self.max_rating] * (self.factors_num+1) * self.users_num,
         #     dtype=np.float32)
 
-        # The state when we know contents critic preferences of users from recommendation system.
+        # The state when we know contents factor preferences of users from recommendation system.
         # self.low_state = np.array(
-        #     [self.min_rating] * self.critics_num * self.users_num,
-        #     dtype=np.float32)  # (self.critics_num+1) => contents feature and contents expected rating.
+        #     [self.min_rating] * self.factors_num * self.users_num,
+        #     dtype=np.float32)  # (self.factors_num+1) => contents feature and contents expected rating.
         # self.high_state = np.array(
-        #     [self.max_rating] * self.critics_num * self.users_num,
+        #     [self.max_rating] * self.factors_num * self.users_num,
         #     dtype=np.float32)
 
         self.action_space = spaces.Box(
             low=self.min_action,
             high=self.max_action,
-            shape=(self.cache_size*self.critics_num,),
+            shape=(self.cache_size*self.factors_num,),
             dtype=np.float32
         )
         self.observation_space = spaces.Box(
@@ -69,11 +69,11 @@ class ContinuousCache(gym.Env):
             dtype=np.float32
         )
 
-    def generate_critics(self):
-        # Each critic has its own preference about contents feature(e.g. genre, director, actor, etc.).
-        # Each critic gives a rating for each content.
-        critics = []
-        for _ in range(self.critics_num-2):
+    def generate_factors(self):
+        # Each factor has its own preference about contents feature(e.g. genre, director, actor, etc.).
+        # Each factor gives a rating for each content.
+        factors = []
+        for _ in range(self.factors_num-2):
             ratings = []
             for _ in range(self.contents_total_num):
                 # rating = np.random.uniform(self.min_rating, self.max_rating)
@@ -84,18 +84,18 @@ class ContinuousCache(gym.Env):
                     rating = 0.0
                 rating = np.round(rating, 2)
                 ratings.append(rating)
-            critics.append(ratings)
+            factors.append(ratings)
 
-        # Generate critics who have an opposite preference to the critics created earlier.
+        # Generate factors who have an opposite preference to the factors created earlier.
         for i in range(2):
             opposite_ratings = []
             for j in range(self.contents_total_num):
-                opposite_rating = self.max_rating - critics[i+1][j]
+                opposite_rating = self.max_rating - factors[i+1][j]
                 opposite_rating = np.round(opposite_rating, 2)
                 opposite_ratings.append(opposite_rating)
-            critics.append(opposite_ratings)
+            factors.append(opposite_ratings)
 
-        return critics
+        return factors
 
     def update_users(self):
         # feature of users with expected ratings.
@@ -103,28 +103,28 @@ class ContinuousCache(gym.Env):
         preferences = []
         # preferences = [1, 2]
         for i in range(self.users_num):
-            # Suppose the users continues to change. (Random critic preference)
-            preference = np.random.randint(1, self.critics_num)
+            # Suppose the users continues to change. (Random factor preference)
+            preference = np.random.randint(1, self.factors_num)
             preferences.append(preference)
 
-            # Suppose the users continues to remain unchanged. (Fix critic preference)
+            # Suppose the users continues to remain unchanged. (Fix factor preference)
             preference = preferences[i]
 
-            # first critic has universal content preference. so, fix to
-            expected_ratings = [0.5*x + 0.5*y for x, y in zip(self.critics[0], self.critics[preference])]
-            # expected_ratings = self.critics[preference]
+            # first factor has universal content preference. so, fix to
+            expected_ratings = [0.5*x + 0.5*y for x, y in zip(self.factors[0], self.factors[preference])]
+            # expected_ratings = self.factors[preference]
             expected_ratings = list(np.round(expected_ratings, 2))
             users.append(expected_ratings)
 
         return users, preferences
 
     def generate_contents(self):
-        # Each content is placed in a continuous space consisting of critics' ratings dimension.
+        # Each content is placed in a continuous space consisting of factors' ratings dimension.
         contents = []
         for i in range(self.contents_total_num):
             content = []
-            for j in range(self.critics_num):
-                content.append(self.critics[j][i])
+            for j in range(self.factors_num):
+                content.append(self.factors[j][i])
             contents.append(content)
 
         return contents
@@ -183,7 +183,7 @@ class ContinuousCache(gym.Env):
         return rating_sum
 
     def reset(self):
-        self.critics = self.generate_critics()
+        self.factors = self.generate_factors()
         self.contents = self.generate_contents()
         self.cache = self.cache_init_random()
         self.users, self.users_preference = self.update_users()
@@ -205,20 +205,20 @@ class ContinuousCache(gym.Env):
 
     def contents_mapping(self, proto_action):
         proto_action = self.rescaling_action(proto_action)  # Makes the range positive.
-        proto_action = np.reshape(proto_action, (self.cache_size, self.critics_num))
+        proto_action = np.reshape(proto_action, (self.cache_size, self.factors_num))
 
-        # Convert the output of the actor to the probability that the user prefers each critic.
-        critic_prob = copy.deepcopy(proto_action)
+        # Convert the output of the actor to the probability that the user prefers each factor.
+        factor_prob = copy.deepcopy(proto_action)
         for i in range(self.cache_size):
-            for j in range(self.critics_num):
-                critic_prob[i][j] = proto_action[i][j] / sum(proto_action[i])
+            for j in range(self.factors_num):
+                factor_prob[i][j] = proto_action[i][j] / sum(proto_action[i])
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -231,7 +231,7 @@ class ContinuousCache(gym.Env):
                     break
                 else: continue
 
-        return critic_prob, cache
+        return factor_prob, cache
 
     def update_state(self):
         # The state is all the contents on the recommendation list of each user.
@@ -262,10 +262,10 @@ class ContinuousCache(gym.Env):
         #     state = np.append(state, self.users[i][content])
         # state = state.flatten()
 
-        # The state when we know contents critic preferences of users from recommendation system.
+        # The state when we know contents factor preferences of users from recommendation system.
         # users_preference = np.array([])
         # for i in range(self.users_num):
-        #     user_preference = [0 for _ in range(self.critics_num)]
+        #     user_preference = [0 for _ in range(self.factors_num)]
         #     user_preference[0] = 0.5
         #     user_preference[self.users_preference[i]] = 0.5
         #     users_preference = np.append(users_preference, user_preference)
@@ -274,14 +274,14 @@ class ContinuousCache(gym.Env):
         return state
 
     def step(self, proto_action):
-        critic_prob, self.cache = self.contents_mapping(proto_action)
+        factor_prob, self.cache = self.contents_mapping(proto_action)
         self.recommendation_list = self.update_recommendation_list()
 
         # done = bool(self.count == self.step_size)
         # if not done:
 
         print('users preference => ', self.users_preference)
-        print('proto action => ', np.round(critic_prob, 2))
+        print('proto action => ', np.round(factor_prob, 2))
         print('cache => ', self.cache)
         print('recommendation list => ', self.recommendation_list)
 
@@ -301,17 +301,17 @@ class ContinuousCache(gym.Env):
 
     def popularity_caching(self):
         # Caching contents based on popular contents(universal preference).
-        # first critic has universal content preference.
-        critic_prob = [1] + [0]*(self.critics_num-1)
-        critic_prob = critic_prob * self.cache_size
-        critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
+        # first factor has universal content preference.
+        factor_prob = [1] + [0]*(self.factors_num-1)
+        factor_prob = factor_prob * self.cache_size
+        factor_prob = np.reshape(factor_prob, (self.cache_size, self.factors_num))
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -352,30 +352,30 @@ class ContinuousCache(gym.Env):
                 else:
                     continue
 
-        print('proto action =>', critic_prob)
+        print('proto action =>', factor_prob)
         print('cache => ', cache)
         print('recommendation list => ', recommendation_list)
         print('popularity caching score => ', np.round(rating_sum, 2))
 
         return rating_sum
 
-    def random_critic_caching(self):
-        # Caching contents based on random critic preference.
-        proto_action = np.random.uniform(self.min_action, self.max_action, self.cache_size*self.critics_num)
-        proto_action = np.reshape(proto_action, (self.cache_size, self.critics_num))
+    def random_factor_caching(self):
+        # Caching contents based on random factor preference.
+        proto_action = np.random.uniform(self.min_action, self.max_action, self.cache_size*self.factors_num)
+        proto_action = np.reshape(proto_action, (self.cache_size, self.factors_num))
 
-        # Convert the output of the actor to the probability that the user prefers each critic.
-        critic_prob = copy.deepcopy(proto_action)
+        # Convert the output of the actor to the probability that the user prefers each factor.
+        factor_prob = copy.deepcopy(proto_action)
         for i in range(self.cache_size):
-            for j in range(self.critics_num):
-                critic_prob[i][j] = proto_action[i][j] / sum(proto_action[i])
+            for j in range(self.factors_num):
+                factor_prob[i][j] = proto_action[i][j] / sum(proto_action[i])
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -416,10 +416,10 @@ class ContinuousCache(gym.Env):
                 else:
                     continue
 
-        print('proto action =>', critic_prob)
+        print('proto action =>', factor_prob)
         print('cache => ', cache)
         print('recommendation list => ', recommendation_list)
-        print('random critic caching score => ', np.round(rating_sum, 2))
+        print('random factor caching score => ', np.round(rating_sum, 2))
 
         return rating_sum
 
@@ -468,26 +468,26 @@ class ContinuousCache(gym.Env):
         return rating_sum
 
     def optimal_caching(self):
-        # Calculate the optimal cache when knowing the user's critic preference.
+        # Calculate the optimal cache when knowing the user's factor preference.
         users = []
         for i in range(self.users_num):
-            user = [0.5] + [0]*(self.critics_num-1)
+            user = [0.5] + [0]*(self.factors_num-1)
             user[self.users_preference[i]] = 0.5
             users.append(user)
 
-        critic_prob = []
+        factor_prob = []
         for j in range(self.users_num):
             for k in range(int(self.recommendation_list_size)):
-                critic_prob.append(users[j])
+                factor_prob.append(users[j])
 
-        critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
+        factor_prob = np.reshape(factor_prob, (self.cache_size, self.factors_num))
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -528,7 +528,7 @@ class ContinuousCache(gym.Env):
                 else:
                     continue
 
-        print('proto action =>', critic_prob)
+        print('proto action =>', factor_prob)
         print('cache => ', cache)
         print('recommendation list => ', recommendation_list)
         print('optimal caching score => ', np.round(rating_sum, 2))
@@ -552,15 +552,15 @@ class ContinuousCache(gym.Env):
 #         return request
 
     def test1(self):
-        critic_prob = [0.2, 0.2, 0.2, 0.2, 0.2] * self.cache_size
-        critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
+        factor_prob = [0.2, 0.2, 0.2, 0.2, 0.2] * self.cache_size
+        factor_prob = np.reshape(factor_prob, (self.cache_size, self.factors_num))
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -608,15 +608,15 @@ class ContinuousCache(gym.Env):
         return rating_sum
 
     def test2(self):
-        critic_prob = [0, 0.25, 0.25, 0.25, 0.25] * self.cache_size
-        critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
+        factor_prob = [0, 0.25, 0.25, 0.25, 0.25] * self.cache_size
+        factor_prob = np.reshape(factor_prob, (self.cache_size, self.factors_num))
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
@@ -664,15 +664,15 @@ class ContinuousCache(gym.Env):
         return rating_sum
 
     def test3(self):
-        critic_prob = [0, 0, 0, 0.5, 0.5] * self.cache_size
-        critic_prob = np.reshape(critic_prob, (self.cache_size, self.critics_num))
+        factor_prob = [0, 0, 0, 0.5, 0.5] * self.cache_size
+        factor_prob = np.reshape(factor_prob, (self.cache_size, self.factors_num))
 
         # Find the content that users on the current network are most likely to prefer.
         cache = []
         for i in range(self.cache_size):
             dot_contents = []
             for j in range(self.contents_total_num):
-                dot_contents.append(np.dot(self.contents[j], critic_prob[i]))
+                dot_contents.append(np.dot(self.contents[j], factor_prob[i]))
 
             dot_contents_dict = {t: dot_contents[t] for t in range(len(dot_contents))}  # list to dict
             sorted_dot_contents_dict = sorted(dot_contents_dict.items(),
