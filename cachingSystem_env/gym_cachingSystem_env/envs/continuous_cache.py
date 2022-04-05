@@ -243,17 +243,6 @@ class ContinuousCache(gym.Env):
                 state = np.append(state, self.users[i][content])
         state = state.flatten()
 
-        # Changed state array.
-        # content_features = np.array([])
-        # predicted_scores = np.array([])
-        # state = np.array([])
-        # for i in range(self.users_num):
-        #     for j in range(self.recommendation_list_size):
-        #         content = self.recommendation_list[i][j]
-        #         content_features = np.append(content_features, self.contents[content])
-        #         predicted_scores = np.append(predicted_scores, self.users[i][content])
-        #     state = np.concatenate((content_features, predicted_scores), axis=None)
-
         # The state is the top contents on the recommendation list of each users.
         # state = np.array([])
         # for i in range(self.users_num):
