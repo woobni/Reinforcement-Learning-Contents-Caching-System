@@ -263,6 +263,7 @@ class ContinuousCache(gym.Env):
         return state
 
     def step(self, proto_action):
+        print('proto action => ', proto_action)
         factor_prob, self.cache = self.contents_mapping(proto_action)
         self.recommendation_list = self.update_recommendation_list()
 
@@ -270,7 +271,7 @@ class ContinuousCache(gym.Env):
         # if not done:
 
         print('users preference => ', self.users_preference)
-        print('proto action => ', np.round(factor_prob, 2))
+        print('factor preference => ', np.round(factor_prob, 2))
         print('cache => ', self.cache)
         print('recommendation list => ', self.recommendation_list)
 
