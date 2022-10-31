@@ -12,4 +12,7 @@
 최종적으로 추천 시스템을 통해 학습된 캐싱 시스템은 현재 사용자들의 예상 평점이 높을 것이라 예상되는 콘텐츠들로 캐시를 구성하게 된다.
 
 ## 콘텐츠 캐싱과 추천 시스템 상호작용 예시
-![Untitled](/img/Untitled 1.png)
+![Untitled](/img/Untitled%201.png)
+
+프로젝트의 자세한 내용은 아래 링크에서 확인할 수 있다.
+https://woobin-lee.notion.site/f579c5bad9a14fff825b317d42ba24f3
